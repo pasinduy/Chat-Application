@@ -13,7 +13,7 @@
             <Image url="@../assets/1507e34f1e44f0ed66e0365113789bbc.jpg" />
          </image>
       </ImageView>
-      <Label layoutX="122.0" layoutY="105.0" text="Server Page">
+      <Label layoutX="122.0" layoutY="105.0" style="-fx-background-color: white;" text="Server Page">
          <font>
             <Font name="System Bold" size="40.0" />
          </font>
