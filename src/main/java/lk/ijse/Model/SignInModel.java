@@ -1,6 +1,8 @@
 package lk.ijse.Model;
 
-import org.example.DBConnection.DBConnection;
+
+
+import lk.ijse.DBConnection.DBConnection;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
