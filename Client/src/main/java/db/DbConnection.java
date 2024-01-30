@@ -9,12 +9,11 @@ public class DbConnection {
     public static DbConnection dbConnection;
     private DbConnection() throws SQLException {
         connection = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/livechat",
-                    "root",
-                        "Ijse@1234"
+                "jdbc:mysql://localhost:3306/chatApp",
+                "root",
+                "Mixage03!"
         );
     }
-
     public  Connection getConnection() {
         return connection;
     }
