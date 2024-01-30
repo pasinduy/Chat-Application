@@ -1,7 +1,7 @@
 package bo.custom.impl;
 
 import bo.custom.LoginBo;
-import dao.DaoFactory;
+import factory.DaoFactory;
 import dao.custom.UserDao;
 import dto.UserDto;
 

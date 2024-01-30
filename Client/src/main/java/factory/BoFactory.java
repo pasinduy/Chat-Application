@@ -1,5 +1,6 @@
-package bo;
+package factory;
 
+import bo.SuperBo;
 import bo.custom.impl.LoginBoImpl;
 
 public class BoFactory {

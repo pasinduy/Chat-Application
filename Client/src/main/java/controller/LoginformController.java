@@ -1,6 +1,6 @@
 package controller;
 
-import bo.BoFactory;
+import factory.BoFactory;
 import bo.custom.LoginBo;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

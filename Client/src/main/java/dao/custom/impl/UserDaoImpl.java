@@ -1,6 +1,6 @@
 package dao.custom.impl;
 
-import dao.SQLUtil;
+import util.SQLUtil;
 import dao.custom.UserDao;
 import dto.UserDto;
 
