@@ -1,5 +1,6 @@
-package dao;
+package factory;
 
+import dao.SuperDao;
 import dao.custom.impl.UserDaoImpl;
 
 public class DaoFactory {

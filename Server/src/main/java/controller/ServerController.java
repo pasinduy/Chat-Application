@@ -1,6 +1,6 @@
 package controller;
 
-import dao.DaoFactory;
+import factory.DaoFactory;
 import dao.custom.UserDao;
 import entity.User;
 import javafx.event.ActionEvent;

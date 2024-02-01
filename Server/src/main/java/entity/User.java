@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 public class User{
-    private int userId;
-    private String userName;
-    private String passWord;
+    private String userID;
+    private String username;
+    private String password;
 }

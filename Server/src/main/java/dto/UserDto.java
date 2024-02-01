@@ -8,6 +8,6 @@ import lombok.*;
 @ToString
 
 public class UserDto {
-    private int userId;
+    private String userId;
     private String username;
 }
