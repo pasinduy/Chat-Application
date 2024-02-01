@@ -98,8 +98,8 @@ public class ServerController {
         try {
             DataOutputStream sendVal = new DataOutputStream(clientSocket.getOutputStream());
             User search = dao.search(sender);
-            if (search.getPassWord().equals(contain)){
-                sendVal.writeUTF("confirm&"+sender+"&"+"is valid");
+            if (search.getPassword().equals(contain)){
+                sendVal.writeUTF("confirm & "+sender+" & "+" is valid");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -158,7 +158,7 @@ public class ServerController {
         if (Objects.equals(sender, "")){
             sender = "someone";
         }
-            String message = ("img&" + sender + "&" + absolutePath);
+            String message = ("img & " + sender + " & " + absolutePath);
             broadcastMessage(clientSocket, message);
             System.out.println(message);
     }
