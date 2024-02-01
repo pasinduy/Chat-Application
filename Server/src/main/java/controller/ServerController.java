@@ -1,30 +1,39 @@
 package controller;
 
+import dao.DaoFactory;
+import dao.custom.UserDao;
+import entity.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.scene.layout.AnchorPane;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerController {
     public TextField txtMessage;
+    public AnchorPane root;
+    public TextField txtClientName;
+    public TextField txtPassWord;
     private ServerSocket serverSocket;
     private ExecutorService threadPool = Executors.newCachedThreadPool();
     private Map<Socket, DataOutputStream> clientStreams = new ConcurrentHashMap<>();
 
     @FXML
     private TextArea txtArea;
+    UserDao dao = (UserDao) DaoFactory.getInstance().getDao(DaoFactory.DAO.USER);
 
     public void initialize() {
         new Thread(() -> {
@@ -51,16 +60,31 @@ public class ServerController {
         try {
             String message;
             while (true) {
-                message = clientInputStream.readUTF();
-                if (message.equals("exit")) {
+                try {
+                    message = clientInputStream.readUTF();
+                } catch (SocketException e) {
+                    if (e.getMessage().equals("Connection reset")) {
+                        break;
+                    } else {
+                        throw e;
+                    }
+                }
+                String[] msg = message.split("&");
+                String type = msg[0];
+                String sender = msg[1];
+                String contain = msg[2];
+
+                if (type.equals("exit")) {
+                    closeConnection(clientSocket);
                     break;
-                } else if (message.equals("image")) {
-
-                } else {
-                    txtArea.appendText("\nClient: " + message);
-
-                    // Broadcast the message to all clients except the sender
-                    broadcastMessage(clientSocket, "Client: " + message);
+                } else if (type.equals("img")) {
+                    receiveImage(clientSocket, sender, contain);
+                } else if (type.equals("login")){
+                    checkUser(clientSocket,sender, contain);
+                }
+                else {
+                    txtArea.appendText("\n" + sender + ":" + contain);
+                    broadcastMessage(clientSocket, message);
                 }
             }
         } catch (IOException e) {
@@ -70,10 +94,29 @@ public class ServerController {
         }
     }
 
+    private void checkUser(Socket clientSocket, String sender, String contain) {
+        try {
+            DataOutputStream sendVal = new DataOutputStream(clientSocket.getOutputStream());
+            User search = dao.search(sender);
+            if (search.getPassWord().equals(contain)){
+                sendVal.writeUTF("confirm&"+sender+"&"+"is valid");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private void broadcastMessage(Socket senderSocket, String message) {
         try {
             for (Socket clientSocket : clientStreams.keySet()) {
-                // Skip the sender, don't send the message back to the client who sent it
                 if (clientSocket != senderSocket) {
                     DataOutputStream clientOutputStream = clientStreams.get(clientSocket);
                     clientOutputStream.writeUTF(message);
@@ -100,7 +143,7 @@ public class ServerController {
             txtArea.appendText("\n" + message);
 
             for (DataOutputStream clientOutputStream : clientStreams.values()) {
-                clientOutputStream.writeUTF("Server : "+message);
+                clientOutputStream.writeUTF("txt&"+"Server&"+(message));
                 clientOutputStream.flush();
             }
         } catch (IOException e) {
@@ -110,5 +153,47 @@ public class ServerController {
     @FXML
     public  void sendTextOnAction(ActionEvent event){
         sendOnAction(event);
+    }
+    private void receiveImage(Socket clientSocket,String sender,String absolutePath) {
+        if (Objects.equals(sender, "")){
+            sender = "someone";
+        }
+            String message = ("img&" + sender + "&" + absolutePath);
+            broadcastMessage(clientSocket, message);
+            System.out.println(message);
+    }
+
+    public void addClientOnAction(ActionEvent event) {
+        String cliName = txtClientName.getText();
+        String pass = txtPassWord.getText();
+        try {
+            if(dao.add(cliName,pass)){
+                txtArea.appendText(cliName+" has added to the system");
+            }
+        } catch (SQLException e) {
+            txtArea.appendText(e.getMessage());
+            txtArea.setWrapText(true);
+        }
+    }
+
+    public void remClientOnAction(ActionEvent event) {
+
+    }
+
+    public void shutDownOnAction(ActionEvent event) {
+        try {
+            String message = "SERVER SHUTTING DOWN";
+            for (DataOutputStream clientOutputStream : clientStreams.values()) {
+                clientOutputStream.writeUTF("txt&"+"Server&"+(message));
+                clientOutputStream.flush();
+            }
+            for (Socket cliSocket: clientStreams.keySet()) {
+                cliSocket.close();
+            }
+            serverSocket.close();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
