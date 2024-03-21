@@ -176,9 +176,7 @@ public class ServerController {
         }
     }
 
-    public void remClientOnAction(ActionEvent event) {
-
-    }
+    public void remClientOnAction(ActionEvent event) {}
 
     public void shutDownOnAction(ActionEvent event) {
         try {
